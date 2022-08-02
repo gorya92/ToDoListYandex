@@ -227,6 +227,8 @@ class ToDoListFragment : Fragment() {
             }
 
         } else {
+            //expanded
+
         }
         super.onPrepareOptionsMenu(menu)
     }
