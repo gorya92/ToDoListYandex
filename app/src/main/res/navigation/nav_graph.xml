@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph.xml"
+    app:startDestination="@id/toDoListFragment">
+
+    <fragment
+        android:id="@+id/toDoListFragment"
+        android:name="com.example.todolistyandex.fragments.ToDoListFragment"
+        android:label="ToDoListFragment" >
+        <action
+            android:id="@+id/action_toDoListFragment_to_newItemFragment"
+            app:destination="@id/newItemFragment" />
+        <argument
+            android:name="Change"
+            app:argType="com.example.todolistyandex.model.TodoItemsRepository" />
+
+
+    </fragment>
+    <fragment
+        android:id="@+id/newItemFragment"
+        android:name="com.example.todolistyandex.fragments.NewItemFragment"
+        android:label="NewItemFragment">
+        <action
+            android:id="@+id/action_newItemFragment_to_toDoListFragment"
+            app:destination="@id/toDoListFragment" />
+        <argument
+            android:name="MyArgChange"
+            app:argType="com.example.todolistyandex.model.TodoItemsRepository" />
+        <argument
+            android:name="id"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="newItem"
+            app:argType="com.example.todolistyandex.model.TodoItemsRepository" />
+        <argument
+            android:name="new"
+            app:argType="boolean" />
+
+
+    </fragment>
+</navigation>
