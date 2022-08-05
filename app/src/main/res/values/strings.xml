@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name"></string>
+    <string name="my_deal">Мои дела</string>
+    <string name="performed">Выполнено-</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="importance">Важность</string>
+    <string name="make_up">Сделать до</string>
+    <string name="delete">Удалить</string>
+    <string name="save">СОХРАНИТЬ</string>
+
+    <string-array name="importance_list">
+        <item>Нет</item>
+        <item>Низкий</item>
+        <item>!! Высокий</item>
+    </string-array>
+
+</resources>
