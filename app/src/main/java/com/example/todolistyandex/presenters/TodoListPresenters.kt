@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
 
 @InjectViewState()
 class TodoListPresenter : MvpPresenter<TodoListView>() {
-    private val TAG = TodoListPresenter::class.java.simpleName
+    var todoListVisible : ArrayList<TodoItem> = arrayListOf()
     private var visibility: Boolean = false
     var start: Boolean = true
 
@@ -76,17 +76,17 @@ class TodoListPresenter : MvpPresenter<TodoListView>() {
 
     private fun initializeVisibilityList() {
         /** Список только с невыполненными делами **/
-        TodoItemRepository.todoListVisible.clear()
+        todoListVisible.clear()
 
         for (i in 0 until TodoItemRepository.todoList.size) {
             if (!TodoItemRepository.todoList[i].done) {
-                TodoItemRepository.todoListVisible.add(TodoItemRepository.todoList[i])
+                todoListVisible.add(TodoItemRepository.todoList[i])
             }
         }
     }
 
     fun changeCompleted() {
-        viewState.setCompletedText(TodoItemRepository.todoList.size - TodoItemRepository.todoListVisible.size)
+        viewState.setCompletedText(TodoItemRepository.todoList.size - todoListVisible.size)
     }
 
     fun changeVisibility() {

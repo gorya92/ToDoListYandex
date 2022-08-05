@@ -95,7 +95,7 @@ class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = linearLayoutManager;
         recyclerView.adapter = dessertAdapter;
-        changeRv(TodoItemRepository.todoListVisible)
+        changeRv(todoListPresenter.todoListVisible)
     }
 
     override fun setCompletedText(i: Int) {
@@ -110,7 +110,7 @@ class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
     override fun setNoVisibility() {
 
         viewBinding.visibilityBtn.setImageResource(R.drawable.ic_baseline_visibility_24)
-        changeRv(TodoItemRepository.todoListVisible)
+        changeRv(todoListPresenter.todoListVisible)
 
     }
 
