@@ -22,7 +22,7 @@ import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenterTag
 
 
-class ToDoListFragment : MvpAppCompatFragment() , TodoListView{
+class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
 
     private var appBarExpanded = true
 
@@ -33,7 +33,7 @@ class ToDoListFragment : MvpAppCompatFragment() , TodoListView{
     var dessertAdapter: TodoitemAdapter = TodoitemAdapter();
 
     @InjectPresenter()
-    lateinit var todoListPresenter : TodoListPresenter
+    lateinit var todoListPresenter: TodoListPresenter
 
 
     override fun onCreateView(
@@ -49,10 +49,9 @@ class ToDoListFragment : MvpAppCompatFragment() , TodoListView{
     }
 
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewBinding = FragmentToDoListBinding.bind(view)
-        todoListPresenter.start= arguments?.getBoolean("start")!!
+        todoListPresenter.start = arguments?.getBoolean("start")!!
         todoListPresenter.initializeAllLists()
         todoListPresenter.changeCompleted()
 
@@ -67,11 +66,12 @@ class ToDoListFragment : MvpAppCompatFragment() , TodoListView{
         viewBinding.fab.setOnClickListener {
             val bundle = Bundle()
             bundle.putBoolean("new", true)
-            findNavController().navigate(R.id.newItemFragment,bundle) }
+            findNavController().navigate(R.id.newItemFragment, bundle)
+        }
 
 
         /** Обработка скрола appBarа **/
-       viewBinding.appbar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+        viewBinding.appbar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
 
             if (Math.abs(verticalOffset) > 200) {
                 appBarExpanded = false
@@ -120,8 +120,7 @@ class ToDoListFragment : MvpAppCompatFragment() , TodoListView{
                 .setIcon(R.drawable.ic_baseline_visibility_off_24)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
 
-        }
-        else{
+        } else {
             collapsedMenu.add("visibility")
                 .setIcon(R.drawable.ic_baseline_visibility_24)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
@@ -135,7 +134,7 @@ class ToDoListFragment : MvpAppCompatFragment() , TodoListView{
             && !appBarExpanded || collapsedMenu.size() != 0
         ) {
             //collapsed
-            Log.d("menus","menus")
+            Log.d("menus", "menus")
             viewBinding.collapsingToolbar.expandedTitleMarginStart = 16
             viewBinding.collapsingToolbar.title = getString(R.string.my_deal)
 
@@ -144,13 +143,19 @@ class ToDoListFragment : MvpAppCompatFragment() , TodoListView{
             viewBinding.collapsingToolbar.setCollapsedTitleTextColor(
                 ContextCompat.getColor(
                     requireActivity(),
-                    R.color.black))
-           viewBinding.collapsingToolbar.setExpandedTitleColor(
+                    R.color.black
+                )
+            )
+            viewBinding.collapsingToolbar.setExpandedTitleColor(
                 ContextCompat.getColor(
                     requireActivity(),
-                    com.google.android.material.R.color.mtrl_btn_transparent_bg_color)) }
+                    com.google.android.material.R.color.mtrl_btn_transparent_bg_color
+                )
+            )
+        }
         super.onPrepareOptionsMenu(menu)
     }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu, menu)
         collapsedMenu = menu
@@ -158,10 +163,13 @@ class ToDoListFragment : MvpAppCompatFragment() , TodoListView{
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.title === "visibility") { todoListPresenter.changeVisibility() }
+        if (item.title === "visibility") {
+            todoListPresenter.changeVisibility()
+        }
         return super.onOptionsItemSelected(item)
     }
-    fun changeRv(todo : ArrayList<TodoItem>){
+
+    fun changeRv(todo: ArrayList<TodoItem>) {
         val productDiffUtilCallback =
             TodoitemAdapter.todoItemDiffCallBack(
                 dessertAdapter.recyclerList,

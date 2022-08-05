@@ -9,7 +9,7 @@ data class TodoItem(
     var importance: String,
     var deadline: String = "01/01/2200",
     val done: Boolean,
-    val created_at: String,
+    var created_at: String,
     var changed_at: String = ""
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
