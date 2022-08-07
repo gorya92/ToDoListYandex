@@ -5,28 +5,46 @@ import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getColor
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.bignerdranch.android.testing.network.NetworkUtil
+import com.bignerdranch.android.testing.retrofitConnect.RetrofitConstants
+import com.bignerdranch.android.testing.retrofitConnect.RetrofitViewModel
+import com.bignerdranch.android.testing.retrofitConnect.repository.Repository
+import com.example.todolistyandex.MyWorker
 import com.example.todolistyandex.R
 import com.example.todolistyandex.databinding.FragmentToDoListBinding
+import com.example.todolistyandex.views.TodoListView
 import com.example.todolistyandex.model.TodoItemRepository
 import com.example.todolistyandex.presenters.TodoListPresenter
-import com.example.todolistyandex.views.TodoListView
+import com.example.todolistyandex.retrofitConnect.repository.RetrofitViewModelFactory
 import com.example.yandextask.adapter.TodoitemAdapter
 import com.example.yandextask.model.TodoItem
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.snackbar.Snackbar
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenterTag
+import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 
 class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
 
     private var appBarExpanded = true
 
+    val bundle = Bundle()
+
     private lateinit var viewBinding: FragmentToDoListBinding
+
 
     private lateinit var collapsedMenu: Menu
 
@@ -48,12 +66,62 @@ class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
         return inflater.inflate(R.layout.fragment_to_do_list, container, false)
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewBinding = FragmentToDoListBinding.bind(view)
         todoListPresenter.start = arguments?.getBoolean("start")!!
-        todoListPresenter.initializeAllLists()
-        todoListPresenter.changeCompleted()
+
+        var retrofitViewModel: RetrofitViewModel
+
+        /** Retrofit connection to project **/
+        val repository = Repository()
+        val viewModelFactory = RetrofitViewModelFactory(repository)
+        retrofitViewModel = ViewModelProvider(this, viewModelFactory)[RetrofitViewModel::class.java]
+
+
+        /** Добавление workManagera **/
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val myWorkRequest =
+            PeriodicWorkRequestBuilder<MyWorker>(480, TimeUnit.MINUTES, 25, TimeUnit.MINUTES)
+                .setConstraints(constraints).build()
+
+        WorkManager.getInstance(requireContext()).enqueue(myWorkRequest)
+
+
+        if (NetworkUtil.getConnectivityStatus(requireActivity())) {
+
+            getList(retrofitViewModel)
+        } else {
+            viewBinding.fab.isEnabled = false
+            Snackbar.make(
+                viewBinding.coordinatorTodo,
+                R.string.noconnection,
+                Snackbar.LENGTH_LONG
+            )
+                .setAction(R.string.retry, View.OnClickListener {
+                    if (NetworkUtil.getConnectivityStatus(requireActivity())) {
+                        getList(retrofitViewModel)
+                        viewBinding.fab.isEnabled = true
+                    } else
+                        Snackbar.make(
+                            viewBinding.coordinatorTodo,
+                            R.string.noconnection2,
+                            Snackbar.LENGTH_SHORT
+                        )
+                            .setAction(R.string.ok, View.OnClickListener {
+
+                            }).setActionTextColor(getColor(requireActivity(), R.color.white))
+                            .setTextColor(getColor(requireActivity(), R.color.white))
+                            .show()
+
+                }).setActionTextColor(getColor(requireActivity(), R.color.white))
+                .setTextColor(getColor(requireActivity(), R.color.white))
+                .show()
+        }
+
+        val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
 
         (activity as AppCompatActivity?)!!.setSupportActionBar(viewBinding.animToolbar)
         (activity as AppCompatActivity?)!!.supportActionBar?.setDisplayHomeAsUpEnabled(false);
@@ -64,11 +132,11 @@ class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
 
         /** Кнопка для добавления новго дела **/
         viewBinding.fab.setOnClickListener {
-            val bundle = Bundle()
-            bundle.putBoolean("new", true)
-            findNavController().navigate(R.id.newItemFragment, bundle)
-        }
 
+            bundle.putBoolean("new", true)
+            patchRequestToList(retrofitViewModel)
+
+        }
 
         /** Обработка скрола appBarа **/
         viewBinding.appbar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
@@ -85,6 +153,11 @@ class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
         super.onViewCreated(view, savedInstanceState)
     }
 
+    fun internetCheck(retrofitViewModel: RetrofitViewModel) {
+        if (NetworkUtil.getConnectivityStatus(requireActivity())) {
+            getList(retrofitViewModel)
+        }
+    }
 
     override fun startApp() {
 
@@ -95,7 +168,7 @@ class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = linearLayoutManager;
         recyclerView.adapter = dessertAdapter;
-        changeRv(todoListPresenter.todoListVisible)
+        changeRv(todoListPresenter.todoListVisible, visibility = todoListPresenter.visibility)
     }
 
     override fun setCompletedText(i: Int) {
@@ -104,13 +177,19 @@ class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
 
     override fun setVisibility() {
         viewBinding.visibilityBtn.setImageResource(R.drawable.ic_baseline_visibility_off_24)
-        changeRv(TodoItemRepository.todoList)
+        Log.d("visibility", todoListPresenter.visibility.toString())
+        todoListPresenter.initializeAllLists()
+        todoListPresenter.changeCompleted()
+        changeRv(TodoItemRepository.todoList, visibility = todoListPresenter.visibility)
     }
 
     override fun setNoVisibility() {
 
         viewBinding.visibilityBtn.setImageResource(R.drawable.ic_baseline_visibility_24)
-        changeRv(todoListPresenter.todoListVisible)
+        Log.d("visibility", todoListPresenter.visibility.toString())
+        todoListPresenter.initializeAllLists()
+        todoListPresenter.changeCompleted()
+        changeRv(todoListPresenter.todoListVisible, todoListPresenter.visibility)
 
     }
 
@@ -129,12 +208,21 @@ class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
         }
     }
 
+
+    fun changeRv(todo: ArrayList<TodoItem>, visibility: Boolean) {
+        dessertAdapter.visibility = visibility
+        dessertAdapter.recyclerList = todo
+
+        dessertAdapter.notifyDataSetChanged()
+    }
+
+
     override fun onPrepareOptionsMenu(menu: Menu) {
         if (collapsedMenu != null
             && !appBarExpanded || collapsedMenu.size() != 0
         ) {
             //collapsed
-            Log.d("menus", "menus")
+
             viewBinding.collapsingToolbar.expandedTitleMarginStart = 16
             viewBinding.collapsingToolbar.title = getString(R.string.my_deal)
 
@@ -169,15 +257,95 @@ class ToDoListFragment : MvpAppCompatFragment(), TodoListView {
         return super.onOptionsItemSelected(item)
     }
 
-    fun changeRv(todo: ArrayList<TodoItem>) {
-        val productDiffUtilCallback =
-            TodoitemAdapter.todoItemDiffCallBack(
-                dessertAdapter.recyclerList,
-                todo
-            )
-        val productDiffResult = DiffUtil.calculateDiff(productDiffUtilCallback)
-        dessertAdapter.submitRepository(todo)
-        productDiffResult.dispatchUpdatesTo(dessertAdapter);
+
+    private fun getList(retrofitViewModel: RetrofitViewModel) {
+
+        retrofitViewModel.getList()
+        retrofitViewModel.ListResponse.observe(viewLifecycleOwner) { res ->
+            if (res.isSuccessful) {
+                RetrofitConstants.REVISION = res.body()!!.revision
+                TodoItemRepository.todoListRequest = res.body()!!
+                TodoItemRepository.todoList = res.body()?.list?.let {
+                    res.body()?.todoListToRepository(
+                        it
+                    )
+                } as ArrayList<TodoItem>
+                todoListPresenter.initializeAllLists()
+                todoListPresenter.changeCompleted()
+
+            } else {
+                if (res.code().toString()[0] == '4') {
+                    Snackbar.make(
+                        viewBinding.coordinatorTodo,
+                        R.string.error400,
+                        Snackbar.LENGTH_SHORT
+                    )
+                        .setAction(R.string.ok, View.OnClickListener {
+
+                        }).setActionTextColor(getColor(requireActivity(), R.color.white))
+                        .setTextColor(getColor(requireActivity(), R.color.white))
+                        .show()
+                }
+                if (res.code().toString()[0] == '5') {
+                    Snackbar.make(
+                        viewBinding.coordinatorTodo,
+                        R.string.error500,
+                        Snackbar.LENGTH_SHORT
+                    )
+                        .setAction(R.string.ok, View.OnClickListener {
+
+                        }).setActionTextColor(getColor(requireActivity(), R.color.white))
+                        .setTextColor(getColor(requireActivity(), R.color.white))
+                        .show()
+                }
+
+            }
+        }
     }
 
+    private fun patchRequestToList(retrofitViewModel: RetrofitViewModel) {
+
+        retrofitViewModel.patchList(todoListPresenter.toTodoList())
+
+        retrofitViewModel.patchListResponse.observe(viewLifecycleOwner) { res ->
+            if (res.isSuccessful) {
+                Log.d("bilion", todoListPresenter.toTodoList().toString())
+                findNavController().navigate(R.id.newItemFragment, bundle)
+            } else {
+                snackbarShow(res.code().toString())
+            }
+        }
+    }
+
+    fun snackbarShow(code: String) {
+        if (code[0] == '4') {
+            Snackbar.make(
+                viewBinding.coordinatorTodo,
+                R.string.error400,
+                Snackbar.LENGTH_SHORT
+            )
+                .setAction(R.string.ok, View.OnClickListener {
+
+                }).setActionTextColor(getColor(requireActivity(), R.color.white))
+                .setTextColor(getColor(requireActivity(), R.color.white))
+                .show()
+        }
+        if (code[0] == '5') {
+            Snackbar.make(
+                viewBinding.coordinatorTodo,
+                R.string.error500,
+                Snackbar.LENGTH_SHORT
+            )
+                .setAction(R.string.ok, View.OnClickListener {
+
+                }).setActionTextColor(getColor(requireActivity(), R.color.white))
+                .setTextColor(getColor(requireActivity(), R.color.white))
+                .show()
+        }
+
+    }
+
+
 }
+
+

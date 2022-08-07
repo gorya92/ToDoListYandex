@@ -2,51 +2,65 @@ package com.example.yandextask.model
 
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.Log
+import com.example.todolistyandex.model.Todo
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 data class TodoItem(
     var id: String,
     var title: String,
     var importance: String,
     var deadline: String = "01/01/2200",
-    val done: Boolean,
+    var done: Boolean,
     var created_at: String,
-    var changed_at: String = ""
-) : Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readString().toString(),
-        parcel.readString().toString(),
-        parcel.readString().toString(),
-        parcel.readString().toString(),
-        parcel.readByte() != 0.toByte(),
-        parcel.readString().toString(),
-        parcel.readString().toString()
-    ) {
-    }
+    var changed_at: String = "",
+    val lastUpdated: String
+) {
 
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(id)
-        parcel.writeString(title)
-        parcel.writeString(importance)
-        parcel.writeString(deadline)
-        parcel.writeByte(if (done) 1 else 0)
-        parcel.writeString(created_at)
-        parcel.writeString(changed_at)
-    }
-
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<TodoItem> {
-        override fun createFromParcel(parcel: Parcel): TodoItem {
-            return TodoItem(parcel)
+    fun todoItemToTodo(TodoItem: TodoItem): Todo {
+        var id = TodoItem.id
+        var title = TodoItem.title
+        var importance: String = TodoItem.importance
+        var deadline: Long = 0
+        Log.d("DATES", TodoItem.deadline)
+        if (TodoItem.deadline != "") {
+            deadline = convertDateToLong(TodoItem.deadline)
         }
 
-        override fun newArray(size: Int): Array<TodoItem?> {
-            return arrayOfNulls(size)
-        }
+        val done: Boolean = TodoItem.done
+        var created_at: Long = 0
+        if (TodoItem.created_at != "")
+            created_at = convertDateToLong(TodoItem.created_at)
+        var changed_at: Long = convertDateToLong(
+            LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        )
+
+        return Todo(
+            id = id,
+            text = title,
+            importance = importance,
+            deadline = deadline,
+            done = done,
+            created_at = created_at,
+            color = "",
+            changed_at = System.currentTimeMillis(),
+            last_updated_by = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        )
+
+    }
+
+    fun convertDateToLong(date: String): Long {
+        val l = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyy"))
+
+        val unix = l.atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond
+        return unix
     }
 
     override fun equals(other: Any?): Boolean {
