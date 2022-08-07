@@ -16,14 +16,19 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todolistyandex.R
 import com.example.todolistyandex.model.TodoItemRepository
+import com.example.todolistyandex.presenters.TodoListPresenter
 import com.example.yandextask.model.TodoItem
+import moxy.presenter.InjectPresenter
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
 class TodoitemAdapter() : RecyclerView.Adapter<TodoitemAdapter.ViewHolder>() {
 
-     var recyclerList : ArrayList<TodoItem> = arrayListOf()
+    var recyclerList: ArrayList<TodoItem> = arrayListOf()
+    var visibility: Boolean = false
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView
@@ -41,17 +46,32 @@ class TodoitemAdapter() : RecyclerView.Adapter<TodoitemAdapter.ViewHolder>() {
         }
 
         fun bind(i: Int) {
-            setAllProperties(recyclerList,i,itemView.context)
+            setAllProperties(recyclerList, i, itemView.context)
+            checked.setOnClickListener {
+                if (!visibility) {
+                    recyclerList[i].done = true
+
+                    TodoItemRepository.todoListVisibility.removeAt(i)
+                    notifyDataSetChanged()
+                } else {
+                    recyclerList[i].done = false
+                    TodoItemRepository.todoListVisibility.add(i, recyclerList[i])
+                    recyclerList.removeAt(i)
+                    notifyDataSetChanged()
+
+                }
+
+            }
         }
 
         /** Установка всех ресурсов по соответствующим параметрам **/
-        fun setAllProperties(todoItemsRepository: ArrayList<TodoItem>, i: Int,activity: Context) {
+        fun setAllProperties(todoItemsRepository: ArrayList<TodoItem>, i: Int, activity: Context) {
             title.text = todoItemsRepository[i].title
             title.setTextColor(getColor(activity, R.color.black))
-            dataTv.setText(todoItemsRepository[i].deadline)
+            dataTv.text = todoItemsRepository[i].deadline
             if (todoItemsRepository[i].done) {
                 checked.setImageResource(R.drawable.ic_checked)
-                title.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG)
+                title.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
                 title.setTextColor(getColor(activity, R.color.label_Tertiary))
             } else {
                 checked.setImageResource(R.drawable.ic_unchecked)
@@ -104,18 +124,18 @@ class TodoitemAdapter() : RecyclerView.Adapter<TodoitemAdapter.ViewHolder>() {
         holder.bind(position)
 
         holder.itemView.setOnClickListener { view ->
-            var bundle =Bundle()
-            bundle.putInt("id",TodoItemRepository.todoList.indexOf(recyclerList[position]))
-            view.findNavController().navigate(R.id.newItemFragment,bundle)
+            var bundle = Bundle()
+            bundle.putInt("id", TodoItemRepository.todoList.indexOf(recyclerList[position]))
+            view.findNavController().navigate(R.id.newItemFragment, bundle)
         }
     }
 
     override fun getItemCount(): Int {
-      //  return todoItemsRepositoryvisible.size
+        //  return todoItemsRepositoryvisible.size
         return recyclerList.size
     }
 
-   fun submitRepository(todoItemsRepository: ArrayList<TodoItem>) {
+    fun submitRepository(todoItemsRepository: ArrayList<TodoItem>) {
         val old = recyclerList
         val diffResult: DiffUtil.DiffResult = DiffUtil.calculateDiff(
             todoItemDiffCallBack(
@@ -153,5 +173,3 @@ class TodoitemAdapter() : RecyclerView.Adapter<TodoitemAdapter.ViewHolder>() {
 
 
 }
-
-

@@ -2,32 +2,31 @@ package com.example.todolistyandex.ui
 
 import android.app.DatePickerDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.bignerdranch.android.testing.network.NetworkUtil
+import com.bignerdranch.android.testing.retrofitConnect.RetrofitConstants
+import com.bignerdranch.android.testing.retrofitConnect.RetrofitViewModel
+import com.bignerdranch.android.testing.retrofitConnect.repository.Repository
 import com.example.todolistyandex.R
 import com.example.todolistyandex.databinding.FragmentNewItemBinding
-import com.example.todolistyandex.databinding.FragmentToDoListBinding
 import com.example.todolistyandex.model.TodoItemRepository
 import com.example.todolistyandex.presenters.NewListPresenters
-import com.example.todolistyandex.presenters.TodoListPresenter
 import com.example.todolistyandex.views.NewItemView
-import com.example.yandextask.model.TodoItem
+import com.example.todolistyandex.model.Todo
+import com.example.todolistyandex.model.element
+import com.example.todolistyandex.retrofitConnect.repository.RetrofitViewModelFactory
+import com.google.android.material.snackbar.Snackbar
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.collections.ArrayList
 
 class NewItemFragment : MvpAppCompatFragment(), NewItemView {
 
@@ -36,7 +35,14 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
     @InjectPresenter()
     lateinit var newListPresenters: NewListPresenters
 
+
+    private lateinit var retrofitViewModel: RetrofitViewModel  // For Retrofit
+
     var cal: Calendar = Calendar.getInstance() // Календарь
+
+
+    val bundle = Bundle()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,9 +56,14 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
 
         viewBinding = FragmentNewItemBinding.bind(view)
 
+
+        /** Retrofit connection to project **/
+        val repository = Repository()
+        val viewModelFactory = RetrofitViewModelFactory(repository)
+        retrofitViewModel = ViewModelProvider(this, viewModelFactory)[RetrofitViewModel::class.java]
+
         newListPresenters.startArr()
 
-        val bundle = Bundle()
         bundle.putBoolean("start", false)
 
         changeGarbageColor()
@@ -66,7 +77,56 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
             findNavController().navigate(R.id.toDoListFragment, bundle)
         }
 
+        setDate()
 
+        viewBinding.save.setOnClickListener {
+
+            if (viewBinding.dealtext.text.toString() != "") {
+                if (arguments?.getBoolean("new")!!) {
+                    if (NetworkUtil.getConnectivityStatus(requireActivity())) {
+                        addItem()
+                    }
+                    else
+                        showInternetSnackBar()
+                } else {
+                    if (NetworkUtil.getConnectivityStatus(requireActivity())) {
+                        putItem(
+                            TodoItemRepository.todoList[requireArguments().getInt("id")].id,
+                            changeItem(requireArguments().getInt("id"))
+                        )
+                    }
+                    else
+                        showInternetSnackBar()
+                }
+            }
+        }
+
+        viewBinding.deletetext.setOnClickListener {
+
+            if (requireArguments().getInt("id") != -1) {
+                deleteItem(TodoItemRepository.todoList[requireArguments().getInt("id")].id)
+            }
+        }
+
+        super.onViewCreated(view, savedInstanceState)
+    }
+
+
+    fun spinnerInitialize() {
+        /** Инициализация спиннера **/
+        ArrayAdapter.createFromResource(
+            requireActivity(),
+            R.array.importance_list,
+
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            viewBinding.spinner.adapter = adapter
+        }
+
+    }
+
+    fun setDate() {
         val dateSetListener =
             DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
                 cal.set(Calendar.YEAR, year)
@@ -93,45 +153,6 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
             } else
                 viewBinding.date.text = ""
         }
-
-
-
-        viewBinding.save.setOnClickListener {
-            if (viewBinding.dealtext.text.toString() != "") {
-
-                if (arguments?.getBoolean("new")!!) addItem()
-                else changeItem(requireArguments().getInt("id"))
-
-                findNavController().navigate(R.id.toDoListFragment, bundle)
-            }
-        }
-
-        viewBinding.deletetext.setOnClickListener {
-            if (requireArguments().getInt("id") != -1) {
-                newListPresenters.removeItem(requireArguments().getInt("id"))
-                findNavController().navigate(R.id.toDoListFragment, bundle)
-            }
-        }
-
-
-
-
-        super.onViewCreated(view, savedInstanceState)
-    }
-
-
-    fun spinnerInitialize() {
-        /** Инициализация спиннера **/
-        ArrayAdapter.createFromResource(
-            requireActivity(),
-            R.array.importance_list,
-
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            viewBinding.spinner.adapter = adapter
-        }
-
     }
 
 
@@ -140,11 +161,11 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
         viewBinding.dealtext.setText(text.title)
         viewBinding.date.text = text.deadline
 
-        if (text.importance == "important")
+        if (text.importance == getString(R.string.important))
             viewBinding.spinner.setSelection(2)
-        if (text.importance == "basic")
+        if (text.importance == getString(R.string.basic))
             viewBinding.spinner.setSelection(0)
-        if (text.importance == "low")
+        if (text.importance == getString(R.string.low))
             viewBinding.spinner.setSelection(1)
     }
 
@@ -182,14 +203,18 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
         viewBinding.date.text = let
     }
 
-    fun changeItem(id: Int) {
-        var important = "basic"
-        if (viewBinding.spinner.selectedItemPosition == 1)
-            important = "low"
-        if (viewBinding.spinner.selectedItemPosition == 2)
-            important = "important"
+    fun changeItem(id: Int): element {
+        var important = ""
 
-        newListPresenters.changeItem(
+        var spinnerID = viewBinding.spinner.selectedItemId.toString()
+        if (spinnerID == "0")
+            important = getString(R.string.basic)
+        if (spinnerID == "1")
+            important = getString(R.string.low)
+        if (spinnerID == "2")
+            important = getString(R.string.important)
+
+        return newListPresenters.changeItem(
             id.toString(),
             viewBinding.dealtext.text.toString(),
             important,
@@ -200,18 +225,26 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
     }
 
     fun addItem() {
-        var important = "basic"
-        if (viewBinding.spinner.selectedItemPosition == 1)
-            important = "low"
-        if (viewBinding.spinner.selectedItemPosition == 2)
-            important = "important"
+        var important = ""
+        var spinnerID = viewBinding.spinner.selectedItemId.toString()
+        if (spinnerID == "0")
+            important = getString(R.string.basic)
+        if (spinnerID == "1")
+            important = getString(R.string.low)
+        if (spinnerID == "2")
+            important = getString(R.string.important)
 
-        newListPresenters.newItem(
+        var add = newListPresenters.newItem(
             id.toString(),
             viewBinding.dealtext.text.toString(),
             important,
             viewBinding.date.text as String,
         )
+        if (NetworkUtil.getConnectivityStatus(requireActivity())) {
+            postRequestToList(add)
+        }
+        else
+            showInternetSnackBar()
 
     }
 
@@ -223,5 +256,90 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
         date.text = PeriodDate?.let { sdf.format(it) }
     }
 
+    private fun postRequestToList(todo: Todo) {
+        val element: element = element(todo, RetrofitConstants.REVISION.toString())
+        retrofitViewModel.postList(element)
+        retrofitViewModel.putItemResponse.observe(viewLifecycleOwner) { res ->
+            if (res.isSuccessful) {
+                RetrofitConstants.REVISION=  res.body()?.revision!!.toInt()
+                findNavController().navigate(R.id.toDoListFragment, bundle)
+            } else {
+                snackbarShow(res.code().toString())
+            }
+        }
+    }
 
-}
+    private fun deleteItem(id: String) {
+
+        retrofitViewModel.deleteItem(id)
+        retrofitViewModel.deleteItem.observe(viewLifecycleOwner) { res ->
+
+            if (res.isSuccessful) {
+                RetrofitConstants.REVISION=  res.body()?.revision!!.toInt()
+                findNavController().navigate(R.id.toDoListFragment, bundle)
+            } else {
+                snackbarShow(res.code().toString())
+            }
+        }
+    }
+
+    private fun putItem(id: String, element: element) {
+
+        retrofitViewModel.putItem(id, element)
+
+        retrofitViewModel.putItem.observe(viewLifecycleOwner) { res ->
+            if (res.isSuccessful) {
+               RetrofitConstants.REVISION=  res.body()?.revision!!.toInt()
+                findNavController().navigate(R.id.toDoListFragment, bundle)
+            } else {
+                snackbarShow(res.code().toString())
+            }
+        }
+    }
+
+
+
+    fun snackbarShow(code: String) {
+        if (code[0] == '4') {
+            Snackbar.make(
+                viewBinding.coordinatorTodo,
+                R.string.error400,
+                Snackbar.LENGTH_SHORT
+            )
+                .setAction("Ок", View.OnClickListener {
+
+                }).setActionTextColor(getColor(requireActivity(), R.color.white))
+                .setTextColor(getColor(requireActivity(), R.color.white))
+                .show()
+        }
+        if (code[0] == '5') {
+            Snackbar.make(
+                viewBinding.coordinatorTodo,
+                R.string.error500,
+                Snackbar.LENGTH_SHORT
+            )
+                .setAction("Ок", View.OnClickListener {
+
+                }).setActionTextColor(getColor(requireActivity(), R.color.white))
+                .setTextColor(getColor(requireActivity(), R.color.white))
+                .show()
+        }
+
+    }
+    fun showInternetSnackBar(){
+            Snackbar.make(
+                viewBinding.coordinatorTodo,
+                R.string.noconnection,
+                Snackbar.LENGTH_LONG
+            ).setAction(R.string.ok, View.OnClickListener {
+            }
+            ).setActionTextColor(getColor(requireActivity(), R.color.white))
+                .setTextColor(getColor(requireActivity(), R.color.white))
+                .show()
+        }
+    }
+
+
+
+
+
