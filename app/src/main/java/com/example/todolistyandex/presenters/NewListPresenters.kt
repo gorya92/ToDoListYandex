@@ -17,15 +17,7 @@ import kotlin.collections.ArrayList
 class NewListPresenters : MvpPresenter<NewItemView>() {
     var cal: Calendar = Calendar.getInstance() // Календарь
     var startArr: ArrayList<TodoItem> = arrayListOf()
-    var changeOrAddItem = TodoItem(
-        id = "0",
-        "большой текст большой текстм большой текст большой т",
-        "basic",
-        deadline = "27/07/2022",
-        done = false,
-        created_at = ""
-
-    )
+    var changeOrAddItem = TodoItemRepository.todoList[0]
 
     fun calendarGet() {
         val myFormat = "dd/MM/yyyy" // mention the format you need
