@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
-class NewItemFragment : MvpAppCompatFragment(), NewItemView {
+class NewItemFragment : MvpAppCompatFragment(),NewItemView {
 
     private lateinit var viewBinding: FragmentNewItemBinding
 
@@ -47,10 +47,8 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
+        var startList = TodoItemRepository.todoList
         viewBinding = FragmentNewItemBinding.bind(view)
-
-        newListPresenters.startArr()
 
         val bundle = Bundle()
         bundle.putBoolean("start", false)
@@ -58,13 +56,12 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
         changeGarbageColor()
         spinnerInitialize()
 
-        if (requireArguments().getInt("id") != -1)
+        if (requireArguments().getInt("id")!=-1)
             setIfThatChange()
 
-        viewBinding.closeBtn.setOnClickListener {
-            newListPresenters.close()
-            findNavController().navigate(R.id.toDoListFragment, bundle)
-        }
+        viewBinding.closeBtn.setOnClickListener{
+            TodoItemRepository.todoList=startList
+            findNavController().navigate(R.id.toDoListFragment,bundle)}
 
 
         val dateSetListener =
@@ -72,43 +69,45 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
                 cal.set(Calendar.YEAR, year)
                 cal.set(Calendar.MONTH, monthOfYear)
                 cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                updateDateInView(viewBinding.date)
+                newListPresenters.calendarGet()
             }
 
         /** Свитч предназначен для изменения параметра даты  **/
-        viewBinding.dateSwitch.setOnCheckedChangeListener { compoundButton, b ->
+       viewBinding.dateSwitch.setOnCheckedChangeListener { compoundButton, b ->
             if (viewBinding.dateSwitch.isChecked) {
-                val dpd = DatePickerDialog(
-                    requireActivity(),
-                    dateSetListener,
-                    cal.get(Calendar.YEAR),
-                    cal.get(Calendar.MONTH),
-                    cal.get(Calendar.DAY_OF_MONTH)
-                )
-                var date: Date = Date()
+                    val dpd = DatePickerDialog(
+                        requireActivity(),
+                        dateSetListener,
+                        cal.get(Calendar.YEAR),
+                        cal.get(Calendar.MONTH),
+                        cal.get(Calendar.DAY_OF_MONTH)
+                    )
+                    var date: Date = Date()
 
-                dpd.datePicker.minDate = cal.time.time
+                    dpd.datePicker.minDate = cal.time.time
 
-                dpd.show()
+                    dpd.show()
             } else
-                viewBinding.date.text = ""
+              viewBinding.date.text = ""
         }
 
 
 
         viewBinding.save.setOnClickListener {
-            if (viewBinding.dealtext.text.toString() != "") {
+            if (viewBinding.dealtext.text.toString() != ""){
+                if (arguments?.getBoolean("new")!!)
+                TodoItemRepository.todoList.add( addItem())
 
-                if (arguments?.getBoolean("new")!!) addItem()
-                else changeItem(requireArguments().getInt("id"))
-
-                findNavController().navigate(R.id.toDoListFragment, bundle)
+                else{
+                    TodoItemRepository.todoList[requireArguments().getInt("id")]=changeItem(requireArguments().getInt("id"))
+                }
+                findNavController().navigate(R.id.toDoListFragment,bundle)
             }
-        }
+            }
 
         viewBinding.deletetext.setOnClickListener {
-            if (requireArguments().getInt("id") != -1) {
-                newListPresenters.removeItem(requireArguments().getInt("id"))
+            if (requireArguments().getInt("id")!=-1) {
+                TodoItemRepository.todoList.removeAt(requireArguments().getInt("id"))
                 findNavController().navigate(R.id.toDoListFragment, bundle)
             }
         }
@@ -120,7 +119,8 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
     }
 
 
-    fun spinnerInitialize() {
+
+    fun spinnerInitialize(){
         /** Инициализация спиннера **/
         ArrayAdapter.createFromResource(
             requireActivity(),
@@ -135,92 +135,81 @@ class NewItemFragment : MvpAppCompatFragment(), NewItemView {
     }
 
 
-    private fun setIfThatChange() {
+    fun setIfThatChange(){
         val text = TodoItemRepository.todoList[requireArguments().getInt("id")]
         viewBinding.dealtext.setText(text.title)
-        viewBinding.date.text = text.deadline
+        viewBinding.date.text= text.deadline
 
         if (text.importance == "important")
             viewBinding.spinner.setSelection(2)
         if (text.importance == "basic")
-            viewBinding.spinner.setSelection(0)
+           viewBinding.spinner.setSelection(0)
         if (text.importance == "low")
-            viewBinding.spinner.setSelection(1)
+          viewBinding.spinner.setSelection(1)
     }
 
 
     override fun changeGarbageColor() {
-        if (viewBinding.dealtext.text.toString() != "") {
-            viewBinding.deletetext.setTextColor(getColor(requireActivity(), R.color.Red))
-            viewBinding.deleteImg.setImageResource(R.drawable.ic_baseline_deletered_24)
+        if (viewBinding.dealtext.text.toString() != "" ) {
+           viewBinding.deletetext.setTextColor(getColor(requireActivity(), R.color.Red))
+           viewBinding.deleteImg.setImageResource(R.drawable.ic_baseline_deletered_24)
         }
 
         viewBinding.dealtext.addTextChangedListener {
 
             if (viewBinding.dealtext.text.toString() != "" && !arguments?.getBoolean("new")!!) {
-                viewBinding.deletetext.setTextColor(getColor(requireActivity(), R.color.Red))
-                viewBinding.deleteImg.setImageResource(R.drawable.ic_baseline_deletered_24)
+               viewBinding.deletetext.setTextColor(getColor(requireActivity(), R.color.Red))
+              viewBinding.deleteImg.setImageResource(R.drawable.ic_baseline_deletered_24)
             } else {
-                viewBinding.deletetext.setTextColor(
-                    getColor(
-                        requireActivity(),
-                        R.color.Label_Disable
-                    )
-                )
-                viewBinding.deleteImg.setImageResource(R.drawable.ic_baseline_delete_24)
+              viewBinding.deletetext.setTextColor(getColor(requireActivity(), R.color.Label_Disable))
+              viewBinding.deleteImg.setImageResource(R.drawable.ic_baseline_delete_24)
             }
         }
 
         if (viewBinding.dealtext.lineCount == 4) {
-            viewBinding.textcard.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+           viewBinding.textcard.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         }
 
 
     }
 
-    override fun setDate(let: String?) {
-        viewBinding.date.text = let
+    override fun setData(let: String?) {
+        viewBinding.date.text =let
     }
+fun changeItem(id:Int): TodoItem {
+    var important = "basic"
+    if (viewBinding.spinner.selectedItemPosition == 1)
+        important = "low"
+    if (viewBinding.spinner.selectedItemPosition == 2)
+        important = "important"
 
-    fun changeItem(id: Int) {
+    return   TodoItem(
+        id = id.toString(),
+        viewBinding.dealtext.text.toString() ,
+        importance = important,
+        done = false,
+        deadline = viewBinding.date.text as String,
+        created_at = LocalDateTime.now()
+            .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+    )
+}
+     fun addItem(): TodoItem {
         var important = "basic"
         if (viewBinding.spinner.selectedItemPosition == 1)
             important = "low"
         if (viewBinding.spinner.selectedItemPosition == 2)
             important = "important"
 
-        newListPresenters.changeItem(
-            id.toString(),
-            viewBinding.dealtext.text.toString(),
-            important,
-            viewBinding.date.text as String,
-        )
+                return   TodoItem(
+                    id = (TodoItemRepository.todoList + 1).toString(),
+                    viewBinding.dealtext.text.toString() ,
+                    importance = important,
+                    done = false,
+                    deadline = viewBinding.date.text as String,
+                    created_at = LocalDateTime.now()
+                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                )
 
-
-    }
-
-    fun addItem() {
-        var important = "basic"
-        if (viewBinding.spinner.selectedItemPosition == 1)
-            important = "low"
-        if (viewBinding.spinner.selectedItemPosition == 2)
-            important = "important"
-
-        newListPresenters.newItem(
-            id.toString(),
-            viewBinding.dealtext.text.toString(),
-            important,
-            viewBinding.date.text as String,
-        )
-
-    }
-
-    private fun updateDateInView(date: TextView) {
-        val myFormat = "dd/MM/yyyy" // mention the format you need
-        val sdf = SimpleDateFormat(myFormat, Locale.FRANCE)
-        var PeriodDate = cal.time
-
-        date.text = PeriodDate?.let { sdf.format(it) }
     }
 
 
