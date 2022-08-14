@@ -1,0 +1,13 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.settings
+fastlane/report.xml
+fastlane/README.md
+app/google-services.json
+node_modules
+package-lock.json
