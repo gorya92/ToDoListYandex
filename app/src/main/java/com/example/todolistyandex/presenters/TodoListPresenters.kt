@@ -13,23 +13,23 @@ import java.time.format.DateTimeFormatter
 
 
 @InjectViewState()
-class TodoListPresenter : MvpPresenter<TodoListView>() {
+class TodoListPresenter : MvpPresenter<TodoListView>()  {
     private val TAG = TodoListPresenter::class.java.simpleName
-    private var visibility: Boolean = false
-    var start: Boolean = true
+    private var visibility : Boolean = false
+    var start : Boolean = true
 
-    fun initializeAllLists() {
+    fun initializeAllLists(){
 
         if (start) {
             initializeTodoList()
-            start = !start
+            start=!start
         }
         initializeVisibilityList()
         viewState.startApp()
 
     }
 
-    private fun initializeTodoList() {
+   private fun initializeTodoList(){
         val dateTime = LocalDateTime.now()
             .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
         Log.d("Date", dateTime)
@@ -74,7 +74,7 @@ class TodoListPresenter : MvpPresenter<TodoListView>() {
         }
     }
 
-    private fun initializeVisibilityList() {
+   private fun initializeVisibilityList(){
         /** Список только с невыполненными делами **/
         TodoItemRepository.todoListVisible.clear()
 
@@ -85,21 +85,22 @@ class TodoListPresenter : MvpPresenter<TodoListView>() {
         }
     }
 
-    fun changeCompleted() {
-        viewState.setCompletedText(TodoItemRepository.todoList.size - TodoItemRepository.todoListVisible.size)
+    fun changeCompleted(){
+        viewState.setCompletedText( TodoItemRepository.todoList.size - TodoItemRepository.todoListVisible.size)
     }
 
-    fun changeVisibility() {
-        if (!visibility) {
+    fun changeVisibility(){
+        if (!visibility)
+        {
             viewState.setVisibility()
-            visibility = true
-        } else {
+            visibility=true
+        }
+        else {
             viewState.setNoVisibility()
-            visibility = false
+            visibility=false
         }
 
     }
-
     fun changeMenuVisibility() {
         viewState.changeMenuVisibility(visibility)
 
