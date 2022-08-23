@@ -3,33 +3,25 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.1705" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/ic_baseline_delete_24.xml" value="0.125" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/ic_baseline_deletered_24.xml" value="0.191" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/ic_baseline_visibility_24.xml" value="0.1935" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/ic_baseline_visibility_off_24.xml" value="0.1935" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/ic_checked.xml" value="0.189" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/ic_high.xml" value="0.1325" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/ic_low.xml" value="0.1325" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/ic_unchecked.xml" value="0.1935" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/ic_uncheckedred.xml" value="0.1955" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/rectanle.xml" value="0.1325" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/scrim.xml" value="0.19" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/drawable/scrim_topdown.xml" value="0.19" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/font/roboto.xml" value="0.3927083333333333" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/layout/activity_main.xml" value="0.33" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/layout/custom_spinner.xml" value="0.1" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/layout/fragment_new_item.xml" value="0.3566084788029925" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/layout/fragment_to_do_list.xml" value="0.22" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/layout/todo_item.xml" value="0.33" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandex/app/src/main/res/menu/menu.xml" value="0.18802083333333333" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandexes/app/src/main/res/layout/activity_main.xml" value="0.1526268115942029" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandexes/app/src/main/res/layout/fragment_new_item.xml" value="0.1526268115942029" />
-        <entry key="..\:/Users/pospi/AndroidStudioProjects/ToDoListYandexes/app/src/main/res/layout/fragment_to_do_list.xml" value="0.1526268115942029" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList-master/app/src/main/res/layout/activity_main.xml" value="0.3605072463768116" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList-master/app/src/main/res/layout/fragment_add.xml" value="0.3605072463768116" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList-master/app/src/main/res/layout/fragment_task.xml" value="0.3605072463768116" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList-master/app/src/main/res/layout/fragment_update.xml" value="0.3605072463768116" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList-master/app/src/main/res/layout/row_layout.xml" value="0.1" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList/app/src/main/res/drawable-v24/ic_baseline_close_24.xml" value="0.1" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList/app/src/main/res/drawable/ic_baseline_settings_24.xml" value="0.14" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList/app/src/main/res/font/roboto.xml" value="0.1" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList/app/src/main/res/layout/fragment_add.xml" value="0.18854166666666666" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList/app/src/main/res/layout/fragment_task.xml" value="0.26685393258426965" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList/app/src/main/res/layout/fragment_update.xml" value="0.18854166666666666" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList/app/src/main/res/layout/row_layout.xml" value="0.1" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList/app/src/main/res/menu/menu.xml" value="0.18802083333333333" />
+        <entry key="..\:/Users/pospi/AndroidStudioProjects/Kotlin-MVVM-ToDoList/app/src/main/res/menu/task_menu.xml" value="0.1" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
