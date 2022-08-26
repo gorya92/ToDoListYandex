@@ -6,7 +6,7 @@ import moxy.viewstate.strategy.OneExecutionStateStrategy
 import moxy.viewstate.strategy.StateStrategyType
 
 @StateStrategyType(OneExecutionStateStrategy::class)
-interface NewItemView : MvpView {
+interface NewItemView: MvpView {
     fun changeGarbageColor()
-    fun setDate(let: String?)
+    fun setData(let: String?)
 }
