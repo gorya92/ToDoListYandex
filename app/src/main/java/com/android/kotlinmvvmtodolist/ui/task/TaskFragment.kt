@@ -177,6 +177,11 @@ class TaskFragment : Fragment() {
         viewModel.getAllDoneTasks.observe(viewLifecycleOwner) {
             binding.performed.text = getString(R.string.performed) + it.size
         }
+        viewModel.getAllTasks
+        viewModel.getAllTasks.observe(viewLifecycleOwner) {
+            viewModel.deleteRepeat()
+            viewModel.patchList(it)
+        }
 
             viewModel.getAllPriorityTask.observe(viewLifecycleOwner) {
                 adapter.submitList(it)
